@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -37,6 +38,11 @@ public class ProductVariantRepositoryAdapter implements ProductVariantRepository
                 .stream()
                 .map(this::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Optional<ProductVariant> findById(UUID id) {
+        return jpaRepository.findById(id).map(this::toDomain);
     }
 
     private ProductVariantEntity toEntity(ProductVariant variant) {
