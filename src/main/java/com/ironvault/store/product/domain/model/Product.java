@@ -2,6 +2,8 @@ package com.ironvault.store.product.domain.model;
 
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Product {
@@ -13,6 +15,7 @@ public class Product {
     private String imageUrl;
     private boolean active;
     private LocalDateTime createdAt;
+    private List<ProductVariant> variants = new ArrayList<>();
 
     public Product() { }
 
@@ -94,5 +97,13 @@ public class Product {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public List<ProductVariant> getVariants() {
+        return variants;
+    }
+
+    public void setVariants(List<ProductVariant> variants) {
+        this.variants = variants;
     }
 }

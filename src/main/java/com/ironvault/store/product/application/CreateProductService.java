@@ -35,7 +35,8 @@ public class CreateProductService implements CreateProductUseCase {
                 .map(v -> ProductVariant.create(saveProduct.getId(), v.size(), v.price(), v.stock()))
                 .toList();
 
-        productVariantRepositoryPort.saveAll(productVariants);
+        List<ProductVariant> savedVariants =  productVariantRepositoryPort.saveAll(productVariants);
+        saveProduct.setVariants(savedVariants);
         return saveProduct;
     }
 }
