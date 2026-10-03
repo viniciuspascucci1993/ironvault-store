@@ -62,12 +62,20 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> getAll(HttpServletRequest httpRequest) {
+    public ResponseEntity<List<ProductResponse>> getAll(
+            @RequestParam(name = "merchantId", required = false) UUID merchantIdParam,
+            HttpServletRequest httpRequest) {
+
         String merchantIdAttr = (String) httpRequest.getAttribute("merchantId");
-        if (merchantIdAttr == null) {
-            throw new IllegalStateException("merchantId not found in authentication token");
+
+        UUID merchantId;
+        if (merchantIdAttr != null) {
+            merchantId = UUID.fromString(merchantIdAttr);
+        } else if (merchantIdParam != null) {
+            merchantId = merchantIdParam;
+        } else {
+            throw new IllegalArgumentException("merchantId is required");
         }
-        UUID merchantId = UUID.fromString(merchantIdAttr);
 
         List<ProductResponse> products = getAllProductsUseCase.getByMerchantId(merchantId)
                 .stream()

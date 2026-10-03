@@ -64,7 +64,7 @@ public class PaymentClient {
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
         var response = restTemplate.exchange(
-            paymentUrl + "/api/internal/payments" + paymentId,
+            paymentUrl + "/api/internal/payments/" + paymentId,
                 HttpMethod.GET,
                 request,
                 Map.class
