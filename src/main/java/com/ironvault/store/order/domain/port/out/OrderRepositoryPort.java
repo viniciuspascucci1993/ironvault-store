@@ -10,4 +10,6 @@ public interface OrderRepositoryPort {
     Order save(Order order);
 
     Optional<Order> findById(UUID id);
+
+    Optional<Order> findByPaymentId(String paymentId);
 }
