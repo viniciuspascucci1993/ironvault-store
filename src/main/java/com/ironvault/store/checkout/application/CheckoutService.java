@@ -4,34 +4,43 @@ import com.ironvault.store.address.domain.model.Address;
 import com.ironvault.store.address.domain.port.in.CreateAddressUseCase;
 import com.ironvault.store.checkout.adapter.in.dto.CheckoutRequest;
 import com.ironvault.store.checkout.adapter.in.dto.CheckoutResponse;
+import com.ironvault.store.checkout.adapter.in.dto.OrderStatusResponse;
 import com.ironvault.store.checkout.adapter.out.PaymentClient;
 import com.ironvault.store.customer.domain.model.Customer;
 import com.ironvault.store.customer.domain.port.in.FindOrCreateCustomerUseCase;
 import com.ironvault.store.order.domain.model.Order;
 import com.ironvault.store.order.domain.port.in.CreateOrderUseCase;
+import com.ironvault.store.order.domain.port.in.GetOrderByIdUseCase;
 import com.ironvault.store.order.domain.port.in.UpdateOrderPaymentUseCase;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
+@Slf4j
 public class CheckoutService {
 
     private final FindOrCreateCustomerUseCase findOrCreateCustomerUseCase;
     private final CreateAddressUseCase createAddressUseCase;
     private final CreateOrderUseCase createOrderUseCase;
     private final UpdateOrderPaymentUseCase updateOrderPaymentUseCase;
+    private final GetOrderByIdUseCase getOrderByIdUseCase;
     private final PaymentClient paymentClient;
 
     public CheckoutService(FindOrCreateCustomerUseCase findOrCreateCustomerUseCase,
                            CreateAddressUseCase createAddressUseCase,
                            CreateOrderUseCase createOrderUseCase,
                            UpdateOrderPaymentUseCase updateOrderPaymentUseCase,
+                           GetOrderByIdUseCase getOrderByIdUseCase,
                            PaymentClient paymentClient) {
         this.findOrCreateCustomerUseCase = findOrCreateCustomerUseCase;
         this.createAddressUseCase = createAddressUseCase;
         this.createOrderUseCase = createOrderUseCase;
         this.updateOrderPaymentUseCase = updateOrderPaymentUseCase;
+        this.getOrderByIdUseCase = getOrderByIdUseCase;
         this.paymentClient = paymentClient;
     }
 
@@ -89,6 +98,38 @@ public class CheckoutService {
                 paymentResult.status(),
                 paymentResult.pixQrCode(),
                 paymentResult.pixCopyPaste()
+        );
+    }
+
+    public OrderStatusResponse getOrderStatus(UUID orderId) {
+        Order order = getOrderByIdUseCase.getById(orderId);
+
+        String paymentStatus = null;
+        String pixQrCode = null;
+        String pixCopyPaste = null;
+
+        if (order.getPaymentId() != null) {
+            try {
+                PaymentClient.PaymentResult payment =
+                        paymentClient.getPaymentStatus(order.getPaymentId());
+
+                paymentStatus = payment.status();
+                pixQrCode = payment.pixQrCode();
+                pixCopyPaste = payment.pixCopyPaste();
+            } catch (RestClientException ex) {
+                log.warn("Could not fetch payment {} for order {}: {}",
+                        order.getPaymentId(), orderId, ex.getMessage());
+            }
+        }
+
+        return new OrderStatusResponse(
+                order.getId(),
+                order.getStatus(),
+                order.getTotalAmount(),
+                order.getPaymentId(),
+                paymentStatus,
+                pixQrCode,
+                pixCopyPaste
         );
     }
 }
