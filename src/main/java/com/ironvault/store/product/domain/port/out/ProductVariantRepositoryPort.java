@@ -11,4 +11,5 @@ public interface ProductVariantRepositoryPort {
     List<ProductVariant> saveAll(List<ProductVariant> variants);
     List<ProductVariant> findByProductId(UUID productId);
     Optional<ProductVariant> findById(UUID id);
+    boolean decrementStock(UUID variantId, int quantity);
 }

@@ -45,6 +45,11 @@ public class ProductVariantRepositoryAdapter implements ProductVariantRepository
         return jpaRepository.findById(id).map(this::toDomain);
     }
 
+    @Override
+    public boolean decrementStock(UUID variantId, int quantity) {
+        return jpaRepository.decrementStock(variantId, quantity) > 0;
+    }
+
     private ProductVariantEntity toEntity(ProductVariant variant) {
         return new ProductVariantEntity(
                 variant.getId(),
